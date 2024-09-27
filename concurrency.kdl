@@ -1,0 +1,16 @@
+layout {
+    pane size=1 borderless=true {
+        plugin location="tab-bar"
+    }
+     pane split_direction="vertical" { // first logical container
+         // all these panes will be laid out vertically next to each other
+         pane
+         pane split_direction="horizontal" { // second logical container
+             pane
+             pane
+         }
+    }
+    pane size=2 borderless=true {
+        plugin location="status-bar"
+    }
+ }
