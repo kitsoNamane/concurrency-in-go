@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_three.RWMutex()
+	chapter_three.Cond()
 }
