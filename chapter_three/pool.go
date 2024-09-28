@@ -47,11 +47,23 @@ func ConnectToService() interface{} {
 	return struct{}{}
 }
 
+func warmServiceConnCache() *sync.Pool {
+	p := &sync.Pool{
+		New: ConnectToService,
+	}
+
+	for i := 0; i < 10; i++ {
+		p.Put(p.New())
+	}
+	return p
+}
+
 func StartNetworkDaemon() *sync.WaitGroup {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	go func() {
+		connPool := warmServiceConnCache()
 		server, err := net.Listen("tcp", "localhost:9090")
 		if err != nil {
 			log.Fatalf("cannot listen: %v\n", err)
@@ -66,8 +78,9 @@ func StartNetworkDaemon() *sync.WaitGroup {
 				log.Printf("cannot accept connection: %v\n", err)
 				continue
 			}
-			ConnectToService()
+			svcConn := connPool.Get()
 			fmt.Fprintf(conn, "")
+			connPool.Put(svcConn)
 			conn.Close()
 		}
 	}()
