@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_three.CondBroadcast()
+	chapter_three.Pool()
 }
