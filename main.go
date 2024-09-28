@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_three.Cond()
+	chapter_three.CondBroadcast()
 }
