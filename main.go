@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_three.Channel()
+	chapter_three.Select()
 }
