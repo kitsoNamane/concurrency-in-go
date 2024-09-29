@@ -16,6 +16,8 @@ func Channel() {
 		defer close(intStream)
 		defer fmt.Fprintln(&stdoutBuff, "Producer Done.")
 		for i := 0; i < 5; i++ {
+			if i != 0 {
+			}
 			fmt.Fprintf(&stdoutBuff, "Sending: %d\n", i)
 			intStream <- i
 		}
@@ -27,17 +29,24 @@ func Channel() {
 }
 
 func Select() {
-	start := time.Now()
-	c := make(chan interface{})
+	done := make(chan interface{})
 
 	go func() {
 		time.Sleep(5 * time.Second)
-		close(c)
+		close(done)
 	}()
 
-	fmt.Println("Blocking on read...")
-	select {
-	case <-c:
-		fmt.Printf("Unblocked %v later.\n", time.Since(start))
+	workCounter := 0
+loop:
+	for {
+		select {
+		case <-done:
+			break loop
+		default:
+		}
+		workCounter++
+		time.Sleep(1 * time.Second)
 	}
+
+	fmt.Printf("Achieved %v cycles of work before signalled to stop.\n", workCounter)
 }
