@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_three.Pool()
+	chapter_three.Channel()
 }
