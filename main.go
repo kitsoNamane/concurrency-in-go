@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.GoroutinePipelines()
+	chapter_four.Generators()
 }
