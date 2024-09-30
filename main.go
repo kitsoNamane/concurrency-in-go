@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.ErrorHandling()
+	chapter_four.Pipelines()
 }
