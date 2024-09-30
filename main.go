@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.NonConcorrentSafeConfinement()
+	chapter_four.GoroutineLeak()
 }
