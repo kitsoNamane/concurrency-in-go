@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.GoroutineWriteLeakFix()
+	chapter_four.ErrorHandling()
 }
