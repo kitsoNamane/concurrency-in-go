@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/kitsoNamane/concurrency-in-go/chapter_three"
+	"github.com/kitsoNamane/concurrency-in-go/chapter_four"
 )
 
 func main() {
-	chapter_three.Select()
+	chapter_four.NonConcorrentSafeConfinement()
 }
