@@ -38,6 +38,24 @@ func repeatFn(done <-chan interface{}, fn func() interface{}) <-chan interface{}
 	return valueStream
 }
 
+func toInt(done <-chan interface{}, valueStream <-chan interface{}) <-chan int {
+	intStream := make(chan int)
+
+	go func() {
+		defer close(intStream)
+
+		for v := range valueStream {
+			select {
+			case <-done:
+				return
+			case intStream <- v.(int):
+			}
+		}
+	}()
+
+	return intStream
+}
+
 func toString(done <-chan interface{}, valueStream <-chan interface{}) <-chan string {
 	stringStream := make(chan string)
 
@@ -54,6 +72,35 @@ func toString(done <-chan interface{}, valueStream <-chan interface{}) <-chan st
 	}()
 
 	return stringStream
+}
+
+func primeFinder(done <-chan interface{}, intStream <-chan int) <-chan interface{} {
+	primeStream := make(chan interface{})
+
+	go func() {
+		defer close(primeStream)
+
+		for integer := range intStream {
+			integer -= 1
+			prime := true
+			for divisor := integer - 1; divisor > 1; divisor-- {
+				if integer%divisor == 0 {
+					prime = false
+					break
+				}
+			}
+
+			if prime {
+				select {
+				case <-done:
+					return
+				case primeStream <- integer:
+				}
+			}
+		}
+	}()
+
+	return primeStream
 }
 
 func take(done <-chan interface{}, valueStream <-chan interface{}, num int) <-chan interface{} {
