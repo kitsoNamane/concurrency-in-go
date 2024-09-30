@@ -1,6 +1,9 @@
 package chapter_four
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand/v2"
+)
 
 func Generators() {
 	repeat := func(done <-chan interface{}, values ...interface{}) <-chan interface{} {
@@ -9,11 +12,27 @@ func Generators() {
 			defer close(valueStream)
 
 			for _, v := range values {
-				fmt.Println(v)
 				select {
 				case <-done:
 					return
 				case valueStream <- v:
+				}
+			}
+		}()
+		return valueStream
+	}
+
+	repeatFn := func(done <-chan interface{}, fn func() interface{}) <-chan interface{} {
+		valueStream := make(chan interface{})
+
+		go func() {
+			defer close(valueStream)
+
+			for {
+				select {
+				case <-done:
+					return
+				case valueStream <- fn():
 				}
 			}
 		}()
@@ -40,7 +59,14 @@ func Generators() {
 	done := make(chan interface{})
 	defer close(done)
 
+	rand := func() interface{} { return rand.Int() }
+
 	for num := range take(done, repeat(done, 1), 10) {
 		fmt.Printf("%v ", num)
+	}
+	fmt.Println()
+
+	for num := range take(done, repeatFn(done, rand), 10) {
+		fmt.Println(num)
 	}
 }
