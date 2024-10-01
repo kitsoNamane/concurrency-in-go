@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.Generators()
+	chapter_four.Context()
 }
