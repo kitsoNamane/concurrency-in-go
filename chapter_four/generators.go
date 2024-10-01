@@ -241,7 +241,7 @@ func Generators() {
 		return chanStream
 	}
 
-	for v := range bridge(nil, genVals()) {
+	for v := range bridge(done, genVals()) {
 		fmt.Printf("%v ", v)
 	}
 }
