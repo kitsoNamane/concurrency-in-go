@@ -10,11 +10,13 @@ func repeat(done <-chan interface{}, values ...interface{}) <-chan interface{} {
 	go func() {
 		defer close(valueStream)
 
-		for _, v := range values {
-			select {
-			case <-done:
-				return
-			case valueStream <- v:
+		for {
+			for _, v := range values {
+				select {
+				case <-done:
+					return
+				case valueStream <- v:
+				}
 			}
 		}
 	}()
@@ -213,7 +215,7 @@ func Generators() {
 	}
 
 	var message string
-	for token := range toString(done, take(done, repeat(done, "I", "am."), 2)) {
+	for token := range toString(done, take(done, repeat(done, "I", "am."), 5)) {
 		message += token
 	}
 	fmt.Printf("message: %s...\n", message)
