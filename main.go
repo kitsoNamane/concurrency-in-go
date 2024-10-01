@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_four.FanOutFanIn()
+	chapter_four.Generators()
 }

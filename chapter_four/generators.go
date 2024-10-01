@@ -142,6 +142,61 @@ func orDone(done, c <-chan interface{}) <-chan interface{} {
 	return valStream
 }
 
+func tee(done <-chan interface{}, in <-chan interface{}) (<-chan interface{}, <-chan interface{}) {
+	out1 := make(chan interface{})
+	out2 := make(chan interface{})
+
+	go func() {
+		defer close(out1)
+		defer close(out2)
+
+		for val := range orDone(done, in) {
+			var out1, out2 = out1, out2
+			for i := 0; i < 2; i++ {
+				select {
+				case <-done:
+				case out1 <- val:
+					out1 = nil
+				case out2 <- val:
+					out2 = nil
+				}
+			}
+		}
+	}()
+
+	return out1, out2
+}
+
+func bridge(done <-chan interface{}, chanStream <-chan <-chan interface{}) <-chan interface{} {
+	valStream := make(chan interface{})
+
+	go func() {
+		defer close(valStream)
+
+		for {
+			var stream <-chan interface{}
+
+			select {
+			case <-done:
+				return
+			case maybeStream, ok := <-chanStream:
+				if ok == false {
+					return
+				}
+				stream = maybeStream
+			}
+			for val := range orDone(done, stream) {
+				select {
+				case valStream <- val:
+				case <-done:
+				}
+			}
+		}
+	}()
+
+	return valStream
+}
+
 func Generators() {
 	done := make(chan interface{})
 	defer close(done)
@@ -162,4 +217,31 @@ func Generators() {
 		message += token
 	}
 	fmt.Printf("message: %s...\n", message)
+
+	out1, out2 := tee(done, take(done, repeat(done, 1, 2), 4))
+
+	for val1 := range out1 {
+		fmt.Printf("out1: %v, out2: %v\n", val1, <-out2)
+	}
+
+	genVals := func() <-chan <-chan interface{} {
+		chanStream := make(chan (<-chan interface{}))
+
+		go func() {
+			defer close(chanStream)
+
+			for i := 0; i < 10; i++ {
+				stream := make(chan interface{}, 1)
+				stream <- i
+				close(stream)
+				chanStream <- stream
+			}
+		}()
+
+		return chanStream
+	}
+
+	for v := range bridge(nil, genVals()) {
+		fmt.Printf("%v ", v)
+	}
 }
