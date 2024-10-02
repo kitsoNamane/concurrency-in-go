@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_five.HeartBeat()
+	chapter_five.RateLimit()
 }
