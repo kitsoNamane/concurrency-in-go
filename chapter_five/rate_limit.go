@@ -5,20 +5,32 @@ import (
 	"log"
 	"os"
 	"sync"
+
+	"golang.org/x/time/rate"
 )
 
-type APIConnection struct{}
-
-func Open() *APIConnection {
-	return &APIConnection{}
+type APIConnection struct {
+	rateLimiter *rate.Limiter
 }
 
-func (a *APIConnection) DeadFile(ctx context.Context) error {
+func Open() *APIConnection {
+	return &APIConnection{
+		rateLimiter: rate.NewLimiter(rate.Limit(1), 1),
+	}
+}
+
+func (a *APIConnection) ReadFile(ctx context.Context) error {
+	if err := a.rateLimiter.Wait(ctx); err != nil {
+		return err
+	}
 	// Pretend we do work here
 	return nil
 }
 
 func (a *APIConnection) ResolveAddress(ctx context.Context) error {
+	if err := a.rateLimiter.Wait(ctx); err != nil {
+		return err
+	}
 	// Pretend we do work here
 	return nil
 }
@@ -37,7 +49,7 @@ func RateLimit() {
 		go func() {
 			defer wg.Done()
 
-			err := apiConnection.DeadFile(context.Background())
+			err := apiConnection.ReadFile(context.Background())
 			if err != nil {
 				log.Printf("cannot read file: %v\n", err)
 			}
