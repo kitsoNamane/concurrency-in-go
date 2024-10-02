@@ -2,59 +2,40 @@ package chapter_five
 
 import (
 	"fmt"
-	"time"
+	"math/rand/v2"
 )
 
-func doWork(done <-chan interface{}, pulseInterval time.Duration) (<-chan interface{}, <-chan time.Time) {
-	heartbeat := make(chan interface{})
-	results := make(chan time.Time)
+func doWork(done <-chan interface{}) (<-chan interface{}, <-chan int) {
+	heartbeatStream := make(chan interface{}, 1)
+	workStream := make(chan int)
 
 	go func() {
-		defer close(heartbeat)
-		defer close(results)
+		defer close(heartbeatStream)
+		defer close(workStream)
 
-		pulse := time.Tick(pulseInterval)
-		workGen := time.Tick(2 * pulseInterval)
-
-		sendPulse := func() {
+		for i := 0; i < 10; i++ {
 			select {
-			case heartbeat <- struct{}{}:
-			default: // 4
+			case heartbeatStream <- struct{}{}:
+			default:
 			}
-		}
 
-		sendResult := func(r time.Time) {
-			for {
-				select {
-				case <-pulse:
-					sendPulse()
-				case results <- r:
-					return
-				}
-			}
-		}
-
-		for i := 0; i < 2; i++ {
 			select {
 			case <-done:
 				return
-			case <-pulse: // 5
-				sendPulse()
-			case r := <-workGen:
-				sendResult(r)
+			case workStream <- rand.IntN(10):
 			}
 		}
+
 	}()
 
-	return heartbeat, results
+	return heartbeatStream, workStream
 }
 
 func HeartBeat() {
 	done := make(chan interface{})
-	time.AfterFunc(10*time.Second, func() { close(done) })
+	defer close(done)
 
-	const timeout = 2 * time.Second
-	heartbeat, results := doWork(done, timeout/2)
+	heartbeat, results := doWork(done)
 	for {
 		select {
 		case _, ok := <-heartbeat: // 4
@@ -67,9 +48,6 @@ func HeartBeat() {
 				return
 			}
 			fmt.Printf("results %v\n", r)
-		case <-time.After(timeout): // 6
-			fmt.Println("worker goroutine is not healthy")
-			return
 		}
 	}
 }
