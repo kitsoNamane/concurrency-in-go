@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/kitsoNamane/concurrency-in-go/chapter_four"
+	"github.com/kitsoNamane/concurrency-in-go/chapter_five"
 )
 
 func main() {
-	chapter_four.Context()
+	chapter_five.RunError()
 }
