@@ -26,8 +26,6 @@ func doWork(done <-chan interface{}, pulseInterval time.Duration) (<-chan interf
 		sendResult := func(r time.Time) {
 			for {
 				select {
-				case <-done:
-					return
 				case <-pulse:
 					sendPulse()
 				case results <- r:
@@ -36,7 +34,7 @@ func doWork(done <-chan interface{}, pulseInterval time.Duration) (<-chan interf
 			}
 		}
 
-		for {
+		for i := 0; i < 2; i++ {
 			select {
 			case <-done:
 				return
@@ -68,8 +66,9 @@ func HeartBeat() {
 			if ok == false {
 				return
 			}
-			fmt.Printf("results %v\n", r.Second())
+			fmt.Printf("results %v\n", r)
 		case <-time.After(timeout): // 6
+			fmt.Println("worker goroutine is not healthy")
 			return
 		}
 	}
