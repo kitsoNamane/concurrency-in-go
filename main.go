@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_five.RunError()
+	chapter_five.HeartBeat()
 }
