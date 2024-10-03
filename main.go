@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	chapter_five.RateLimit()
+	chapter_five.HealingGoroutines()
 }
